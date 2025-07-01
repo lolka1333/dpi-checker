@@ -6,8 +6,7 @@ export default defineConfig({
   base: '/dpi-checker/', // замените на название вашего репозитория
   server: {
     port: 3000,
-    open: true,
-    https: false
+    open: true
   },
   build: {
     target: 'esnext',

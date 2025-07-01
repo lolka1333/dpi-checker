@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Play, Pause, Wifi, WifiOff, AlertTriangle, CheckCircle, XCircle, Clock, Zap } from 'lucide-react';
+import { Play, Pause, WifiOff, AlertTriangle, CheckCircle, XCircle, Clock, Zap } from 'lucide-react';
 
 interface TestCase {
   id: string;
