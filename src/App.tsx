@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Play, Pause, WifiOff, AlertTriangle, CheckCircle, XCircle, Clock, Zap } from 'lucide-react';
+import { Play, Pause, WifiOff, AlertTriangle, CheckCircle, XCircle, Clock, Zap, Terminal } from 'lucide-react';
 
 interface TestCase {
   id: string;
@@ -213,7 +213,7 @@ const DPIChecker: React.FC = () => {
 
   const getStatusIcon = () => {
     switch (status) {
-      case 'ready': return <Zap className="w-5 h-5 text-green-500" />;
+      case 'ready': return <Zap className="w-5 h-5 text-emerald-500" />;
       case 'checking': return <Clock className="w-5 h-5 text-blue-500 animate-spin" />;
       case 'error': return <WifiOff className="w-5 h-5 text-red-500" />;
     }
@@ -222,46 +222,57 @@ const DPIChecker: React.FC = () => {
   const getResultIcon = (result: TestResult) => {
     switch (result.status) {
       case 'checking': return <Clock className="w-4 h-4 text-blue-500 animate-spin" />;
-      case 'ok': return <CheckCircle className="w-4 h-4 text-green-500" />;
+      case 'ok': return <CheckCircle className="w-4 h-4 text-emerald-500" />;
       case 'bad': return <XCircle className="w-4 h-4 text-red-500" />;
-      case 'warning': return <AlertTriangle className="w-4 h-4 text-yellow-500" />;
+      case 'warning': return <AlertTriangle className="w-4 h-4 text-amber-500" />;
       case 'failed': return <AlertTriangle className="w-4 h-4 text-gray-500" />;
     }
   };
 
   const getResultColor = (result: TestResult) => {
     switch (result.status) {
-      case 'ok': return 'text-green-600 font-medium';
+      case 'ok': return 'text-emerald-600 font-medium';
       case 'bad': return 'text-red-600 font-medium';
-      case 'warning': return 'text-yellow-600 font-medium';
+      case 'warning': return 'text-amber-600 font-medium';
       case 'failed': return 'text-gray-600 font-medium';
       default: return 'text-blue-600';
     }
   };
 
+  const getProviderColor = (provider: string) => {
+    const colors = {
+      'Cloudflare': 'bg-orange-100 text-orange-800',
+      'DigitalOcean': 'bg-blue-100 text-blue-800',
+      'Hetzner': 'bg-red-100 text-red-800',
+      'OVH': 'bg-purple-100 text-purple-800',
+      'Oracle': 'bg-red-100 text-red-800',
+    };
+    return colors[provider as keyof typeof colors] || 'bg-gray-100 text-gray-800';
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-4 md:p-6">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-3 sm:p-6">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+        <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 mb-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div>
-              <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
-                RU :: TCP 16-20 DPI Checker
+            <div className="flex-1 min-w-0">
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
+                DPI Checker
               </h1>
-              <p className="text-gray-600 text-sm md:text-base">
-                Детекция DPI обрыва соединений методом TCP 16-20
+              <p className="text-gray-600 text-sm sm:text-base">
+                TCP 16-20 DPI Detection Tool
               </p>
             </div>
             
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+              <div className="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-2">
                 {getStatusIcon()}
-                <span className={`font-semibold text-sm md:text-base ${
-                  status === 'ready' ? 'text-green-600' : 
+                <span className={`font-semibold text-sm ${
+                  status === 'ready' ? 'text-emerald-600' : 
                   status === 'checking' ? 'text-blue-600' : 'text-red-600'
                 }`}>
-                  Status: {statusText}
+                  {statusText}
                 </span>
               </div>
               
@@ -269,116 +280,138 @@ const DPIChecker: React.FC = () => {
                 onClick={isRunning ? handleStop : handleStart}
                 disabled={status === 'checking'}
                 className={`
-                  flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all
+                  flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all
                   ${isRunning || status === 'checking'
-                    ? 'bg-gray-500 hover:bg-gray-600 text-white cursor-not-allowed'
-                    : 'bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white shadow-lg hover:shadow-xl transform hover:-translate-y-0.5'
+                    ? 'bg-gray-400 text-white cursor-not-allowed'
+                    : 'bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl'
                   }
                 `}
               >
-                {isRunning || status === 'checking' ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-                <span className="hidden sm:inline">
-                  {isRunning || status === 'checking' ? 'Running...' : 'Start Test'}
-                </span>
+                {isRunning || status === 'checking' ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
+                {isRunning || status === 'checking' ? 'Running...' : 'Start Test'}
               </button>
             </div>
           </div>
         </div>
 
-        {/* Results Table */}
-        <div className="bg-white rounded-xl shadow-lg overflow-hidden mb-6">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
-                <tr>
-                  <th className="px-4 py-3 text-left font-semibold text-sm md:text-base">#</th>
-                  <th className="px-4 py-3 text-left font-semibold text-sm md:text-base">Provider</th>
-                  <th className="px-4 py-3 text-left font-semibold text-sm md:text-base">DPI[tcp 16-20] Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {results.length === 0 ? (
-                  <tr>
-                    <td colSpan={3} className="px-4 py-8 text-center text-gray-500">
-                      Нажмите "Start Test" для начала проверки
-                    </td>
-                  </tr>
-                ) : (
-                  results.map((result) => (
-                    <tr key={result.id} className="hover:bg-gray-50 transition-colors">
-                      <td className="px-4 py-3 font-medium text-sm md:text-base">{result.id}</td>
-                      <td className="px-4 py-3 text-sm md:text-base">{result.provider}</td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-2">
-                          {getResultIcon(result)}
-                          <span className={`text-sm md:text-base ${getResultColor(result)}`}>
-                            {result.statusText}
-                          </span>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* Logs */}
-        <div className="bg-white rounded-xl shadow-lg overflow-hidden mb-6">
-          <div className="bg-gray-800 px-4 py-2">
-            <h3 className="text-white font-medium text-sm md:text-base">Console Logs</h3>
-          </div>
-          <div 
-            ref={logRef}
-            className="bg-gray-900 text-green-400 p-4 h-64 md:h-80 overflow-y-auto font-mono text-xs md:text-sm"
-          >
-            {logs.length === 0 ? (
-              <div className="text-gray-500">Логи появятся здесь после запуска теста...</div>
-            ) : (
-              logs.map((log, index) => (
-                <div key={index} className="mb-1 whitespace-pre-wrap break-words">
-                  <span className="text-gray-400">[{log.timestamp}]</span>
-                  {log.prefix && <span className="text-blue-400"> {log.prefix}/</span>}
-                  <span className={`
-                    ${log.level === 'ERR' ? 'text-red-400' : 
-                      log.level === 'WARN' ? 'text-yellow-400' : 'text-green-400'}
-                  `}> {log.level}</span>
-                  <span className="text-gray-300">: {log.message}</span>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Results */}
+          <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+            <div className="bg-gradient-to-r from-blue-500 to-indigo-600 px-4 py-3">
+              <h2 className="text-white font-semibold text-lg flex items-center gap-2">
+                <CheckCircle className="w-5 h-5" />
+                Test Results
+              </h2>
+            </div>
+            
+            <div className="custom-scrollbar overflow-y-auto" style={{ maxHeight: '400px' }}>
+              {results.length === 0 ? (
+                <div className="p-8 text-center text-gray-500">
+                  <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+                    <Play className="w-8 h-8 text-gray-400" />
+                  </div>
+                  <p>Click "Start Test" to begin DPI detection</p>
                 </div>
-              ))
-            )}
+              ) : (
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-gray-200">
+                      <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">ID</th>
+                      <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Provider</th>
+                      <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">DPI Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {results.map((result) => (
+                      <tr key={result.id} className="hover:bg-gray-50 transition-colors">
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          <span className="text-xs font-mono bg-gray-100 px-2 py-1 rounded font-medium">{result.id}</span>
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${getProviderColor(result.provider)}`}>
+                            {result.provider}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          <div className="flex items-center gap-2">
+                            {getResultIcon(result)}
+                            <span className={`text-sm font-medium ${getResultColor(result)}`}>
+                              {result.statusText}
+                            </span>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          </div>
+
+          {/* Logs */}
+          <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+            <div className="bg-gradient-to-r from-gray-700 to-gray-800 px-4 py-3">
+              <h2 className="text-white font-semibold text-lg flex items-center gap-2">
+                <Terminal className="w-5 h-5" />
+                Console Logs
+                {logs.length > 0 && (
+                  <span className="bg-white/20 text-xs px-2 py-1 rounded-full ml-2">
+                    {logs.length}
+                  </span>
+                )}
+              </h2>
+            </div>
+            
+            <div 
+              ref={logRef}
+              className="bg-gray-900 text-green-400 p-4 custom-scrollbar overflow-y-auto font-mono text-xs"
+              style={{ height: '400px' }}
+            >
+              {logs.length === 0 ? (
+                <div className="text-gray-500 text-center py-8">
+                  Logs will appear here after starting the test...
+                </div>
+              ) : (
+                logs.map((log, index) => (
+                  <div key={index} className="mb-1 whitespace-pre-wrap break-words">
+                    <span className="text-gray-500 text-xs">{log.timestamp}</span>
+                    {log.prefix && <span className="text-cyan-400 text-xs"> {log.prefix}</span>}
+                    <span className={`text-xs font-bold ${
+                      log.level === 'ERR' ? 'text-red-400' : 
+                      log.level === 'WARN' ? 'text-amber-400' : 'text-emerald-400'
+                    }`}> {log.level}</span>
+                    <span className="text-gray-300 text-xs">: {log.message}</span>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="bg-white rounded-xl shadow-lg p-6">
-          <div className="text-center space-y-2">
-            <p className="text-gray-600 text-sm md:text-base">
-              💡 DPI[tcp 16-20] / См. <strong>
-                <a 
-                  href="https://github.com/net4people/bbs/issues/490" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-blue-600 hover:text-blue-800 transition-colors"
-                >
-                  здесь
-                </a>
-              </strong> для получения дополнительной информации.
-            </p>
-            <p className="text-gray-600 text-sm md:text-base">
-              Этот чекер (и другие) доступны в <strong>
-                <a 
-                  href="https://github.com/hyperion-cs/dpi-checkers" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-blue-600 hover:text-blue-800 transition-colors"
-                >
-                  этом
-                </a>
-              </strong> открытом репозитории.
-            </p>
-          </div>
+        <div className="bg-white rounded-xl shadow-lg p-4 mt-6 text-center space-y-2">
+          <p className="text-gray-600 text-sm">
+            💡 <strong className="text-blue-600">DPI[tcp 16-20]</strong> detection method • 
+            <a 
+              href="https://github.com/net4people/bbs/issues/490" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:text-blue-800 transition-colors ml-1 underline"
+            >
+              Learn more
+            </a>
+          </p>
+          <p className="text-gray-600 text-sm">
+            Open source • 
+            <a 
+              href="https://github.com/hyperion-cs/dpi-checkers" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:text-blue-800 transition-colors ml-1 underline"
+            >
+              View on GitHub
+            </a>
+          </p>
         </div>
       </div>
     </div>
